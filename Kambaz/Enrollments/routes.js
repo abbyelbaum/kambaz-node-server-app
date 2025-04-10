@@ -20,16 +20,31 @@ export default function EnrollmentRoutes(app) {
     res.sendStatus(204);
   });
 
-  app.get("/api/users/:userId/enrollments", (req, res) => {
-    let { userId } = req.params;
-    if (userId === "current") {
-      const currentUser = req.session["currentUser"];
-      if (!currentUser) {
-        return res.sendStatus(401);
-      }
-      userId = currentUser._id;
-    }
-    const courses = dao.findEnrollmentsForUser(userId);
-    res.json(courses);
-  });
+  app.get("/api/enrollments", async (req, res) => {
+    const es = await dao.findAllEnrollments().populate("user").populate("course");
+    res.send(es);
+  })
+
+  app.get("/api/users/:userId/enrollments", async (req, res) => {
+    const ex = await dao.findCoursesForUser(req.params.userId);
+    res.send(ex)
+  })
+
+  app.get("/api/courses/:cid/enrollments", async (req, res) => {
+    const ex = await dao.findUsersForCourse(req.params.cid);
+    res.send(ex)
+  })
+
+  // app.get("/api/users/:userId/enrollments", (req, res) => {
+  //   let { userId } = req.params;
+  //   if (userId === "current") {
+  //     const currentUser = req.session["currentUser"];
+  //     if (!currentUser) {
+  //       return res.sendStatus(401);
+  //     }
+  //     userId = currentUser._id;
+  //   }
+  //   const courses = dao.findEnrollmentsForUser(userId);
+  //   res.json(courses);
+  // });
 }
